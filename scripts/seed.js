@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 // 1. अपना MongoDB URI यहाँ डालें (या .env फाइल से लोड करें)
 // नोट: टेस्टिंग के लिए आप इसे हार्डकोड कर सकते हैं या dotenv यूज़ करें
-const MONGODB_URI = "mongodb+srv://username:password@cluster0.mongodb.net/devstore?retryWrites=true&w=majority"; 
+const MONGODB_URI = "mongodb+srv://mahadevtanti191_db_user:maha123@cluster0.60yqudl.mongodb.net/"; 
 
 if (!MONGODB_URI) {
   console.error("❌ MONGODB_URI is missing inside the script!");

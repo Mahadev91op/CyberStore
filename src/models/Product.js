@@ -46,7 +46,7 @@ const ProductSchema = new mongoose.Schema({
   // Example for RAM: { "type": "DDR5", "speed": "5200MHz" }
   specs: {
     type: Map,
-    of: mongoose.Schema.Typesqq.Mixed
+    of: mongoose.Schema.Types.Mixed
   }
 }, { timestamps: true });
 
