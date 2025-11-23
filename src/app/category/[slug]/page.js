@@ -2,36 +2,27 @@ import dbConnect from "@/lib/db";
 import Product from "@/models/Product";
 import ProductCard from "@/components/product/ProductCard";
 import Link from "next/link";
-import { Filter, SlidersHorizontal, ChevronRight, AlertCircle } from "lucide-react";
+import { Filter, SlidersHorizontal, ChevronRight, AlertCircle, Check } from "lucide-react";
 
 // 1. डेटाबेस से प्रोडक्ट्स और फिल्टर लॉजिक
 async function getProducts(categorySlug, searchParams) {
   try {
     await dbConnect();
     
-    // Case-insensitive category match (e.g., "processor" -> "Processor")
     const categoryRegex = new RegExp(`^${categorySlug}$`, 'i');
-    
-    // बेसिक क्वेरी
     let query = { category: categoryRegex };
 
     // --- Filters Logic ---
-    
-    // 1. Brand Filter (URL: ?brand=intel,amd)
     if (searchParams.brand) {
       const brands = searchParams.brand.split(","); 
       query.brand = { $in: brands.map(b => new RegExp(b, 'i')) };
     }
 
-    // 2. Stock Filter (URL: ?stock=in_stock)
     if (searchParams.stock === 'in_stock') {
       query.stock = { $gt: 0 };
     }
 
-    // प्रोडक्ट्स लाओ (Lean performance ke liye)
     const products = await Product.find(query).lean();
-    
-    // Serialization (Object ID fix)
     return JSON.parse(JSON.stringify(products));
 
   } catch (error) {
@@ -47,46 +38,50 @@ export default async function CategoryPage(props) {
   
   const products = await getProducts(params.slug, searchParams);
   
-  // Category नाम को सुंदर बनाना (e.g. "graphics-card" -> "Graphics Card")
   const categoryName = params.slug
     .split("-")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-  // ब्रांड्स की लिस्ट (आप इसे DB से भी डायनामिकली ला सकते हैं)
   const availableBrands = ['Intel', 'AMD', 'Nvidia', 'MSI', 'Asus', 'Gigabyte', 'Corsair', 'Zotac'];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-[#050505] text-white py-8 relative selection:bg-red-500 selection:text-white">
+      
+      {/* Background Glows */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[10%] left-[-10%] w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[150px]"></div>
+          <div className="absolute bottom-[10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[120px]"></div>
+      </div>
+
+      <div className="container mx-auto px-4 max-w-7xl relative z-10">
         
         {/* Breadcrumb */}
         <nav className="flex items-center text-sm text-gray-500 mb-8">
-          <Link href="/" className="hover:text-red-600 transition">Home</Link>
-          <ChevronRight size={16} className="mx-2" />
-          <span className="text-gray-900 font-bold capitalize">{categoryName}</span>
+          <Link href="/" className="hover:text-white transition">Home</Link>
+          <ChevronRight size={14} className="mx-2 text-gray-700" />
+          <span className="text-gray-300 font-bold capitalize">{categoryName}</span>
         </nav>
 
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* --- LEFT: FILTER SIDEBAR (Sticky) --- */}
-          <div className="w-full lg:w-64 flex-shrink-0">
-            <div className="bg-white p-5 rounded-xl border border-gray-200 sticky top-24 shadow-sm">
-              <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
-                <Filter size={20} className="text-red-600" />
-                <h3 className="font-bold text-lg text-gray-900">Filters</h3>
+          {/* --- LEFT: FILTER SIDEBAR (Dark & Sticky) --- */}
+          <div className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-[#111] p-6 rounded-2xl border border-white/10 sticky top-24 shadow-xl backdrop-blur-md">
+              
+              <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/10">
+                <Filter size={20} className="text-red-500" />
+                <h3 className="font-bold text-lg text-white">Filters</h3>
               </div>
 
               {/* Brand Filter */}
-              <div className="mb-6">
-                <h4 className="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Brand</h4>
-                <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-thin">
+              <div className="mb-8">
+                <h4 className="font-bold mb-4 text-xs uppercase text-gray-500 tracking-wider">Brand</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent pr-2">
                   {availableBrands.map((brand) => {
-                    // चेक करें कि ब्रांड पहले से URL में है या नहीं
                     const currentBrands = searchParams.brand ? searchParams.brand.split(',') : [];
                     const isActive = currentBrands.some(b => b.toLowerCase() === brand.toLowerCase());
                     
-                    // टॉगल लॉजिक: अगर है तो हटाओ, नहीं तो जोड़ो
                     let newBrands;
                     if (isActive) {
                       newBrands = currentBrands.filter(b => b.toLowerCase() !== brand.toLowerCase());
@@ -94,7 +89,6 @@ export default async function CategoryPage(props) {
                       newBrands = [...currentBrands, brand.toLowerCase()];
                     }
                     
-                    // नया URL बनाओ
                     const newQuery = new URLSearchParams(searchParams);
                     if (newBrands.length > 0) newQuery.set('brand', newBrands.join(','));
                     else newQuery.delete('brand');
@@ -103,12 +97,12 @@ export default async function CategoryPage(props) {
                       <Link 
                         key={brand}
                         href={`/category/${params.slug}?${newQuery.toString()}`}
-                        className={`flex items-center gap-3 text-sm hover:text-red-600 transition cursor-pointer group`}
+                        className="group flex items-center gap-3 cursor-pointer"
                       >
-                        <div className={`w-4 h-4 border rounded flex items-center justify-center transition ${isActive ? 'bg-red-600 border-red-600' : 'border-gray-300 group-hover:border-red-400'}`}>
-                          {isActive && <div className="w-2 h-2 bg-white rounded-full" />}
+                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${isActive ? 'bg-red-600 border-red-600' : 'border-white/20 bg-[#1a1a1a] group-hover:border-white/40'}`}>
+                          {isActive && <Check size={14} className="text-white" strokeWidth={3} />}
                         </div>
-                        <span className={isActive ? 'font-bold text-gray-900' : 'text-gray-600'}>{brand}</span>
+                        <span className={`text-sm transition-colors ${isActive ? 'font-bold text-white' : 'text-gray-400 group-hover:text-gray-200'}`}>{brand}</span>
                       </Link>
                     );
                   })}
@@ -117,27 +111,29 @@ export default async function CategoryPage(props) {
 
               {/* Stock Filter */}
               <div>
-                <h4 className="font-bold mb-3 text-xs uppercase text-gray-400 tracking-wider">Availability</h4>
+                <h4 className="font-bold mb-4 text-xs uppercase text-gray-500 tracking-wider">Availability</h4>
                 <Link 
                   href={
                     searchParams.stock 
-                    ? `/category/${params.slug}?${new URLSearchParams({...searchParams, stock: ''}).toString().replace('&stock=', '')}` // Remove stock filter
-                    : `/category/${params.slug}?${new URLSearchParams({...searchParams, stock: 'in_stock'}).toString()}` // Add stock filter
+                    ? `/category/${params.slug}?${new URLSearchParams({...searchParams, stock: ''}).toString().replace('&stock=', '')}` 
+                    : `/category/${params.slug}?${new URLSearchParams({...searchParams, stock: 'in_stock'}).toString()}` 
                   }
-                  className="flex items-center gap-3 text-sm text-gray-600 hover:text-red-600 cursor-pointer group"
+                  className="group flex items-center gap-3 cursor-pointer"
                 >
-                  <div className={`w-4 h-4 border rounded transition ${searchParams.stock === 'in_stock' ? 'bg-red-600 border-red-600' : 'border-gray-300 group-hover:border-red-400'}`} />
-                  <span className={searchParams.stock === 'in_stock' ? 'font-bold text-gray-900' : ''}>In Stock Only</span>
+                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${searchParams.stock === 'in_stock' ? 'bg-green-600 border-green-600' : 'border-white/20 bg-[#1a1a1a] group-hover:border-white/40'}`}>
+                     {searchParams.stock === 'in_stock' && <Check size={14} className="text-white" strokeWidth={3} />}
+                  </div>
+                  <span className={`text-sm transition-colors ${searchParams.stock === 'in_stock' ? 'font-bold text-white' : 'text-gray-400 group-hover:text-gray-200'}`}>In Stock Only</span>
                 </Link>
               </div>
 
-              {/* Reset Button */}
+              {/* Clear Button */}
               {(searchParams.brand || searchParams.stock) && (
                 <Link 
                   href={`/category/${params.slug}`}
-                  className="mt-6 block text-center text-xs font-bold text-red-600 hover:bg-red-50 py-2 rounded-lg transition"
+                  className="mt-8 block text-center text-xs font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 py-3 rounded-lg transition border border-red-500/20"
                 >
-                  CLEAR ALL FILTERS
+                  RESET FILTERS
                 </Link>
               )}
             </div>
@@ -145,19 +141,19 @@ export default async function CategoryPage(props) {
 
           {/* --- RIGHT: PRODUCT GRID --- */}
           <div className="flex-1">
+            
             {/* Header */}
-            <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-              <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
-                {categoryName} 
-                <span className="text-sm font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
-                  {products.length} Products
-                </span>
-              </h1>
+            <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                  {categoryName}
+                </h1>
+                <p className="text-gray-500 text-sm mt-1">Explore high-performance {categoryName.toLowerCase()}s</p>
+              </div>
               
-              {/* Mobile Filter Button (Visual Only for now) */}
-              <button className="lg:hidden flex items-center gap-2 text-sm font-bold bg-white border px-4 py-2 rounded-lg shadow-sm">
-                <SlidersHorizontal size={16} /> Filters
-              </button>
+              <span className="text-xs font-bold text-gray-400 bg-[#1a1a1a] border border-white/10 px-4 py-2 rounded-full">
+                {products.length} Products Found
+              </span>
             </div>
 
             {/* Products Grid */}
@@ -168,17 +164,17 @@ export default async function CategoryPage(props) {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-xl p-12 text-center border-2 border-dashed border-gray-200 flex flex-col items-center">
-                <div className="bg-gray-50 p-4 rounded-full mb-4">
-                  <AlertCircle size={32} className="text-gray-400" />
+              <div className="bg-[#111] rounded-2xl p-16 text-center border border-dashed border-white/10 flex flex-col items-center">
+                <div className="bg-[#1a1a1a] p-6 rounded-full mb-6 border border-white/5">
+                  <AlertCircle size={40} className="text-gray-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">No products found</h3>
+                <h3 className="text-xl font-bold text-white">No products found</h3>
                 <p className="text-gray-500 mt-2 max-w-md mx-auto">
-                  We couldn't find any products matching your filters in this category. Try resetting filters or browse another category.
+                  We couldn't find any products matching your filters. Try resetting or check back later.
                 </p>
                 <Link 
                   href={`/category/${params.slug}`}
-                  className="mt-6 inline-flex items-center justify-center bg-gray-900 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition"
+                  className="mt-8 inline-flex items-center justify-center bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition"
                 >
                   Clear Filters
                 </Link>
