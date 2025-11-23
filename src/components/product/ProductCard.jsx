@@ -1,29 +1,36 @@
 "use client";
-
-// src/components/product/ProductCard.js
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // 🔥 यह लाइन बहुत जरुरी है
-import { ShoppingCart, Star } from 'lucide-react';
+import Link from 'next/link';
+import { ShoppingCart, Star, Check } from 'lucide-react';
+import { useCart } from '@/context/CartContext'; // 🔥 Import Context
+import { useState } from 'react';
 
 const ProductCard = ({ product }) => {
+  const { addToCart } = useCart(); // 🔥 Use Hook
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = (e) => {
+    e.preventDefault(); // लिंक पर क्लिक होने से रोकें
+    addToCart(product);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 1500); // 1.5 सेकंड बाद वापस नॉर्मल
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100 group flex flex-col">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group flex flex-col h-full">
       
-      {/* 1. लिंक - इमेज और नाम पर क्लिक करने पर पेज खुलेगा */}
       <Link href={`/product/${product._id}`} className="block flex-grow">
-        
         {/* Image Section */}
-        <div className="relative h-64 w-full bg-gray-50 p-4 flex items-center justify-center group-hover:bg-gray-100 transition">
+        <div className="relative h-64 w-full bg-gray-50 p-6 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
           <Image
             src={product.images[0] || 'https://placehold.co/400'} 
             alt={product.name}
             fill
             className="object-contain hover:scale-110 transition-transform duration-500"
           />
-          {/* Discount Badge */}
           {product.discountPrice > 0 && (
-              <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+              <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
                   {(100 - (product.discountPrice / product.price * 100)).toFixed(0)}% OFF
               </span>
           )}
@@ -31,42 +38,45 @@ const ProductCard = ({ product }) => {
 
         {/* Details Section */}
         <div className="p-4">
-          <div className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{product.category}</div>
-          <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-2 h-12 group-hover:text-red-600 transition-colors">
+          <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">{product.category}</div>
+          <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-2 h-[3.2rem] group-hover:text-red-600 transition-colors">
             {product.name}
           </h3>
           
-          {/* Rating Mock */}
+          {/* Rating */}
           <div className="flex items-center mt-2 mb-3">
-              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-              <Star size={16} className="text-gray-300" />
+              <div className="flex text-yellow-400">
+                {[...Array(4)].map((_,i)=><Star key={i} size={14} fill="currentColor" />)}
+                <Star size={14} className="text-gray-300" />
+              </div>
               <span className="text-xs text-gray-400 ml-1">(4.0)</span>
           </div>
         </div>
       </Link>
 
-      {/* 2. प्राइस और कार्ट बटन (लिंक के बाहर रखा है ताकि बटन अलग से काम करे) */}
+      {/* Price & Button */}
       <div className="px-4 pb-4 mt-auto">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xl font-bold text-gray-900">₹{product.discountPrice?.toLocaleString() || product.price.toLocaleString()}</span>
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-gray-900">
+              ₹{(product.discountPrice || product.price).toLocaleString()}
+            </span>
             {product.discountPrice > 0 && (
-                <span className="text-sm text-gray-400 line-through ml-2">₹{product.price.toLocaleString()}</span>
+                <span className="text-xs text-gray-400 line-through">₹{product.price.toLocaleString()}</span>
             )}
           </div>
           
-          {/* यह बटन अभी सिर्फ अलर्ट दिखाएगा, पेज नहीं खोलेगा */}
+          {/* Animated Cart Button */}
           <button 
-            onClick={(e) => {
-                e.preventDefault(); // बटन दबाने पर प्रोडक्ट पेज न खुले
-                alert("Added to cart!");
-            }}
-            className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition z-10 relative"
+            onClick={handleAddToCart}
+            className={`p-3 rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
+              isAdded 
+                ? "bg-green-600 text-white scale-110" 
+                : "bg-gray-100 text-gray-700 hover:bg-red-600 hover:text-white"
+            }`}
+            title="Add to Cart"
           >
-            <ShoppingCart size={20} />
+            {isAdded ? <Check size={20} /> : <ShoppingCart size={20} />}
           </button>
         </div>
       </div>

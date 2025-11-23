@@ -26,7 +26,7 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
-// 3. डमी डेटा (Real-world PC Parts)
+// 3. डमी डेटा (Real-world PC Parts) - 🔥 Updated Images with Placehold.co
 const products = [
   // --- PROCESSORS (CPUs) ---
   {
@@ -36,7 +36,7 @@ const products = [
     discountPrice: 26999,
     category: "Processor",
     brand: "Intel",
-    images: ["https://m.media-amazon.com/images/I/61JP1I++yEL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=Intel+Core+i5-13600K"], // ✅ Working Image
     isFeatured: true,
     specs: {
       socket: "LGA1700",
@@ -54,7 +54,7 @@ const products = [
     discountPrice: 19999,
     category: "Processor",
     brand: "AMD",
-    images: ["https://m.media-amazon.com/images/I/6170mJ3KCSL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=AMD+Ryzen+5+7600X"], // ✅ Working Image
     isFeatured: true,
     specs: {
       socket: "AM5",
@@ -72,7 +72,7 @@ const products = [
     discountPrice: 53500,
     category: "Processor",
     brand: "Intel",
-    images: ["https://m.media-amazon.com/images/I/61uJ3k7YpPL._AC_UF1000,1000_QL80_.jpg"],
+    images: ["https://placehold.co/600x600?text=Intel+Core+i9-14900K"], // ✅ Working Image
     isFeatured: false,
     specs: {
       socket: "LGA1700",
@@ -91,7 +91,7 @@ const products = [
     discountPrice: 19500,
     category: "Motherboard",
     brand: "MSI",
-    images: ["https://m.media-amazon.com/images/I/81xLz4eBuxL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=MSI+PRO+Z790-P"], // ✅ Working Image
     specs: {
       socket: "LGA1700",
       chipset: "Z790",
@@ -107,7 +107,7 @@ const products = [
     discountPrice: 15999,
     category: "Motherboard",
     brand: "Gigabyte",
-    images: ["https://m.media-amazon.com/images/I/81A+c+d0QFL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=Gigabyte+B650M"], // ✅ Working Image
     specs: {
       socket: "AM5",
       chipset: "B650",
@@ -125,7 +125,7 @@ const products = [
     discountPrice: 8999,
     category: "RAM",
     brand: "Corsair",
-    images: ["https://m.media-amazon.com/images/I/61v+-P5kQmL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=Corsair+Vengeance+32GB"], // ✅ Working Image
     specs: {
       type: "DDR5",
       speed: "5200MHz",
@@ -140,7 +140,7 @@ const products = [
     discountPrice: 2999,
     category: "RAM",
     brand: "XPG",
-    images: ["https://m.media-amazon.com/images/I/61x0xF4sEEL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=XPG+GAMMIX+D30"], // ✅ Working Image
     specs: {
       type: "DDR4",
       speed: "3200MHz",
@@ -157,7 +157,7 @@ const products = [
     discountPrice: 27500,
     category: "Graphics Card",
     brand: "Zotac",
-    images: ["https://m.media-amazon.com/images/I/71o7p2+BqiL._SX679_.jpg"],
+    images: ["https://placehold.co/600x600?text=Zotac+RTX+4060"], // ✅ Working Image
     isFeatured: true,
     specs: {
       memory: "8GB",
