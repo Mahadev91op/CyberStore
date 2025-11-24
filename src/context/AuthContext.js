@@ -6,41 +6,41 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // ✅ लोडिंग स्टेट जोड़ी
   const router = useRouter();
 
-  // पेज लोड होने पर चेक करो कि यूजर पहले से लॉगिन है क्या (LocalStorage से)
   useEffect(() => {
     const storedUser = localStorage.getItem("cyberstore_user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user", e);
+      }
     }
+    setIsLoading(false); // ✅ चेक पूरा होने पर लोडिंग बंद करें
   }, []);
 
-  // लॉगिन फंक्शन
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("cyberstore_user", JSON.stringify(userData));
   };
 
-  // लॉगआउट फंक्शन
   const logout = async () => {
-    // 1. Client Side से हटाओ
     setUser(null);
     localStorage.removeItem("cyberstore_user");
-    
-    // 2. Server Side (Cookie) से हटाओ
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch (e) {
       console.error("Logout error", e);
     }
-
-    router.push("/"); // होमपेज पर भेजें
-    router.refresh(); // रिफ्रेश ताकि Navbar अपडेट हो जाए
+    router.push("/");
+    router.refresh();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    // ✅ isLoading भी भेजें ताकि पेजों को पता चले कि अभी चेक चल रहा है
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}> 
       {children}
     </AuthContext.Provider>
   );

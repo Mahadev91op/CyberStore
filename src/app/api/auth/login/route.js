@@ -45,10 +45,19 @@ export async function POST(req) {
     );
 
     // 5. रिस्पॉन्स (कुकी सेट करें)
-    const response = NextResponse.json(
-      { message: "Login successful!", user: { name: user.name, email: user.email } },
-      { status: 200 }
-    );
+    // 👇 user object में 'role' और '_id' भी भेजें
+const response = NextResponse.json(
+  { 
+    message: "Login successful!", 
+    user: { 
+      _id: user._id, 
+      name: user.name, 
+      email: user.email, 
+      role: user.role // ✅ यह सबसे ज़रूरी है
+    } 
+  },
+  { status: 200 }
+);
 
     // टोकन को सुरक्षित कुकी में सेव करें
     response.cookies.set("token", token, {
